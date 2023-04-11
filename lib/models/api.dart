@@ -14,5 +14,9 @@ class Api {
 
   }
 
+  Future getUser(var data) async {
+
+  }
+
 
 }
