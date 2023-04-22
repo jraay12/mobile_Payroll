@@ -11,33 +11,100 @@ class _DashboardState extends State<Dashboard> {
   List payrollList = [];
 
   Future getPayRoll() async {}
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Row(
-          children: const [
-            Icon(Icons.person),
-            SizedBox(width: 4),
-            Text('Admin'),
-          ],
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: PreferredSize(
+      preferredSize: AppBar().preferredSize,
+      child: AppBar(
+        leading: PopupMenuButton<String>(
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'admin',
+                child: Expanded(
+                  child: Row(
+                    children: [
+                      Icon(Icons.person),
+                      SizedBox(width: 4),
+                      Text('Admin'),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'createUser',
+                child: Row(
+                  children: [
+                    Icon(Icons.person_add),
+                    SizedBox(width: 4),
+                    Text('Create User'),
+                  ],
+                ),
+              ),
+            ];
+          },
+          onSelected: (String value) {
+            if (value == 'createUser') {
+              // Show the create user widget
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Create User'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Username',
+                          ),
+                        ),
+                        TextField(
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Save the user data and close the dialog
+                          Navigator.pop(context);
+                        },
+                        child: Text('Save'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          },
         ),
         centerTitle: true,
         title: Container(
           height: 40,
-          width: 100,
-          child: Image.asset('assets/images/logo2.png'),
+          child: Image.asset('assets/images/logo2.png', width: 80),
         ),
         actions: [
           IconButton(
             onPressed: () {
               // Add your logout function here
+              Navigator.pushReplacementNamed(context, '/login');
             },
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
+    ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
