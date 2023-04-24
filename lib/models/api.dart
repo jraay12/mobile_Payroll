@@ -12,7 +12,6 @@ class Api {
   var url = "";
 
   Future login(var data) async {
-
     try {
       var response = await http.post(Uri.parse(url), body: convert.jsonEncode(data),
           headers: {"Content-type" : "application/json"});
@@ -23,7 +22,6 @@ class Api {
         message: jsonResponse['message'],
         data: jsonResponse['data'] ?? {}
       );
-
       return apiResponse;
     }
     catch (error) {
@@ -36,8 +34,20 @@ class Api {
 
   }
 
-  Future getUser(var data) async {
-
+  Future getUser(String token) async {
+    try {
+      var response = await http.post(Uri.parse(url), headers: {'Authorization' : 'Bearer $token'});
+      var jsonResponse = await convert.jsonDecode(response.body);
+      ApiResponse apiResponse = ApiResponse(
+        status: jsonResponse['status'],
+        message: jsonResponse['message'],
+        data: jsonResponse['data'] ?? {}
+      );
+      return apiResponse;
+    }
+    catch(error) {
+      return error;
+    }
   }
 
 
