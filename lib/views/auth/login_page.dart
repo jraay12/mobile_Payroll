@@ -102,6 +102,14 @@ class _LoginPageState extends State<LoginPage> {
       return showStatus(color: Colors.red, text: response.message);
     }
 
+    var userResponse = await Api.instance.getUser(response.data);
+
+    if(userResponse.status == "fail") {
+      return showStatus(color: Colors.red, text: response.message);
+    }
+
+    
+
     return showStatus(color: Colors.green, text: response.message);
   }
 
