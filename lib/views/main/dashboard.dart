@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -10,84 +13,24 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   List payrollList = [];
 
-  Future getPayRoll() async {}
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: PreferredSize(
-      preferredSize: AppBar().preferredSize,
-      child: AppBar(
-        leading: PopupMenuButton<String>(
-          itemBuilder: (BuildContext context) {
-            return <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
-                value: 'admin',
-                child: Expanded(
-                  child: Row(
-                    children: [
-                      Icon(Icons.person),
-                      SizedBox(width: 4),
-                      Text('Admin'),
-                    ],
-                  ),
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'createUser',
-                child: Row(
-                  children: [
-                    Icon(Icons.person_add),
-                    SizedBox(width: 4),
-                    Text('Create User'),
-                  ],
-                ),
-              ),
-            ];
+  Future<List<dynamic>> getPayRoll() async {
+    final response = await http.get(Uri.parse('http://127.0.0.1:8000'));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load payroll');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            // Add your drawer function here
           },
-          onSelected: (String value) {
-            if (value == 'createUser') {
-              // Show the create user widget
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Create User'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Username',
-                          ),
-                        ),
-                        TextField(
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                          ),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Save the user data and close the dialog
-                          Navigator.pop(context);
-                        },
-                        child: Text('Save'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }
-          },
+          icon: const Icon(Icons.menu),
         ),
         centerTitle: true,
         title: Container(
@@ -104,7 +47,6 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-    ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -116,49 +58,67 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-        child: FutureBuilder(
-          future: getPayRoll(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: const [
-                        Text('Error Fetching Data'),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              if (snapshot.hasData) {
-                if (snapshot.data.isEmpty) {
-                  return Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: const [
-                          Text('No Existing Data'),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  payrollList.isEmpty ? payrollList = snapshot.data! : null;
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height * 0.25,
+              alignment: Alignment.center,
+              child: const Text(
+                'Welcome to your Dashboard',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(45.0),
+                ),
+                child: FutureBuilder(
+                  future: getPayRoll(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: const [
+                                Text('Error Fetching Data'),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+                      if (snapshot.hasData) {
+                        final data = snapshot.data as List<dynamic>;
+                        if (data.isEmpty) {
+                          return Center(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: const [
+                                  Text('No Existing Data'),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else {
+                          payrollList.isEmpty
+                              ? payrollList = data
+                              : null;
 
-                  return Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [],
-                      ),
-                    ),
-                  );
-                }
-              }
-            }
-            return const Center(
-              child: SingleChildScrollView(),
-            );
-          },
+                          
+                        }
+                      }
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

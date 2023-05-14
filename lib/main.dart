@@ -9,7 +9,8 @@ void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(primarySwatch: Colors.lightBlue),
-    home: Dashboard(),
+    home: LoginPage(),
   ));
 }
 
+ 

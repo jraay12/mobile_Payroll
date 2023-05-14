@@ -4,12 +4,14 @@ import 'package:mobile_appdev_integrated/models/api.dart';
 import 'dart:convert';
 import '../admin/add_user_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../main/dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
+  
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -21,54 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // Future<void> login() async {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-  //
-  //   final String email = emailController.text.trim();
-  //   final String password = passwordController.text.trim();
-  //
-  //   if (email.isEmpty || password.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Please enter email and password')),
-  //     );
-  //     return;
-  //   }
-  //
-  //   final Uri url = Uri.parse('http://127.0.0.1:8000/api/login');
-  //   final Map<String, String> headers = <String, String>{
-  //     'Content-Type': 'application/json',
-  //   };
-  //   final Map<String, String> body = <String, String>{
-  //     'email': email,
-  //     'password': password,
-  //   };
-  //   final http.Response response = await http.post(url, headers: headers, body: json.encode(body));
-  //
-  //   if (response.statusCode == 200) {
-  //     final Map<String, dynamic> data = json.decode(response.body);
-  //     final String token = data['token'];
-  //
-  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     await prefs.setString('token', token);
-  //
-  //     Navigator.pushReplacement(
-  //       context,
-  //       MaterialPageRoute<AddUser>(
-  //         builder: (BuildContext context) => const AddUser(),
-  //       ),
-  //     );
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Invalid email or password')),
-  //     );
-  //   }
-  //
-  //   setState(() {
-  //     _isLoading = false;
-  //   });
-  // }
+ 
 
   showStatus({required Color color, required String text}) {    // Snackbar to show message of API Response
 
@@ -167,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                         const Text(
                           "Sign in with your Email and Password",
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 10,
                             color: Colors.white,
                           ),
                         ),
@@ -217,18 +172,22 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(
                           height: 20,
                         ),
-                        Container(
-                          alignment: Alignment.center,
-                          width: 260,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: Colors.blue,
+                       Container(
+                        alignment: Alignment.center,
+                        width: 260,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          color: Colors.blue,
                           ),
                           child: TextButton(
-                            onPressed: () async {
-                              login(context);
-                            },
+                           onPressed: () async {
+                            bool isLoggedIn = await login(context);
+                            if (isLoggedIn) {
+                              Navigator.pushReplacementNamed(context, 'Dashboard');
+                            }
+                          },
+
                             child: const Text(
                               'Login',
                               style: TextStyle(
