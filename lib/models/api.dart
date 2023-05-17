@@ -12,7 +12,7 @@ class Api {
   Api.privateConstructor();
   static final Api instance = Api.privateConstructor();
 
-  var url = "";
+  var url = "[http://192.168.95.215:8000/login].";
 
   Future login(var data) async {
     try {
@@ -29,7 +29,8 @@ class Api {
     }
     catch (error) {
       return error;
-    }    var response = await http.post()
+    } 
+     //var response = await http.post()
 
   }
 
