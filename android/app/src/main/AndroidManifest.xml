@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mobile_appdev_integrated">
    <application
-        android:label="mobile_appdev_integrated"
+        android:label="PayRoll System"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

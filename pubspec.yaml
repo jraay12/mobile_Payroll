@@ -41,6 +41,7 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   flutter_dotenv: ^5.0.2
+  mobile_scanner: ^3.2.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter:
   assets:
      - assets/images/background1.jpg
      - assets/images/logo2.png
+     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
