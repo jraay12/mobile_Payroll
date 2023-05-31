@@ -6,7 +6,6 @@ import 'package:mobile_appdev_integrated/views/main/user_dashboard.dart';
 import 'dart:convert';
 import '../admin/add_user_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../main/dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -60,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     final pref = await SharedPreferences.getInstance();
-    pref.setString("token", response.data!["token"]);
+    pref.setString("token", response.data!);
 
     var userResponse = await Api.instance.getUser(response.data);
 
