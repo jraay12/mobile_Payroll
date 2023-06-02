@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_appdev_integrated/models/api.dart';
+import 'package:mobile_appdev_integrated/views/admin/admin_dashboard.dart';
+import 'package:mobile_appdev_integrated/views/main/user_dashboard.dart';
 import 'dart:convert';
 import '../admin/add_user_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../main/dashboard.dart';
+import '../main/user_dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -17,7 +19,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AssetImage background = const AssetImage('assets/images/background1.jpg');
 
-  final formKey = GlobalKey<FormState>();
+  var formKey = GlobalKey<FormState>();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -57,15 +59,27 @@ class _LoginPageState extends State<LoginPage> {
       return showStatus(color: Colors.red, text: response.message);
     }
 
+    final pref = await SharedPreferences.getInstance();
+    pref.setString("token", response.data!["token"]);
+
     var userResponse = await Api.instance.getUser(response.data);
 
     if(userResponse.status == "fail") {
-      return showStatus(color: Colors.red, text: response.message);
+      return showStatus(color: Colors.red, text: userResponse.message);
     }
 
-    
+    showStatus(color: Colors.green, text: response.message);
 
-    return showStatus(color: Colors.green, text: response.message);
+    if(userResponse.data.runtimeType == List<dynamic>) {
+      return Navigator.push(context,
+          MaterialPageRoute(builder: (context) => AdminDashboard()));
+    }else {
+      pref.setString("user", response.data);
+      return Navigator.push(context,
+          MaterialPageRoute(builder: (context) => UserDashboard()));
+    }
+
+
   }
 
   @override
@@ -105,6 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: SingleChildScrollView(
                   child: Form(
+                    key: formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

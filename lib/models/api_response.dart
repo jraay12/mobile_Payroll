@@ -2,7 +2,7 @@ class ApiResponse {
 
   String? status;
   String? message;
-  String? data;
+  var data;
 
   ApiResponse({
     this.status,
