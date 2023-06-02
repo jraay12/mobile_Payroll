@@ -12,16 +12,12 @@ class Api {
 
   Future login(var data) async {
     try {
-
-
       var url = Uri.parse("$baseURL/login");
 
       var response = await http.post(url, body: convert.jsonEncode(data),
           headers: {"Content-type" : "application/json"});
 
-
       var jsonResponse = await convert.jsonDecode(response.body);
-
 
       ApiResponse apiResponse = ApiResponse(
         status: jsonResponse['status'],
@@ -34,13 +30,37 @@ class Api {
     catch (error) {
       ApiResponse apiResponse = ApiResponse(
           status: 'fail',
-          message: "Request Error: ${error}",
+          message: "Request Error: $error",
           data: ""
+      );
+      return apiResponse;
+    }
+  }
+
+  Future logout(var data) async {
+    try {
+      var url = Uri.parse("$baseURL/logout");
+
+      var response = await http.post(url, body: convert.jsonEncode(data),
+        headers: {"Content-type" : "application/json"});
+
+      var jsonResponse = await convert.jsonDecode(response.body);
+      ApiResponse apiResponse = ApiResponse(
+          status: jsonResponse['status'],
+          message: jsonResponse['message'],
+          data: jsonResponse['data'] ?? {}
       );
 
       return apiResponse;
     }
-
+    catch (error) {
+      ApiResponse apiResponse = ApiResponse(
+          status: 'fail',
+          message: "Request Error: $error",
+          data: ""
+      );
+      return apiResponse;
+    }
   }
 
   Future addUser(var data) async {
@@ -68,7 +88,6 @@ class Api {
           message: "Request Error: $error",
           data: ""
       );
-
       return apiResponse;
     }
   }
