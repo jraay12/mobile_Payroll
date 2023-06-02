@@ -70,11 +70,11 @@ class _LoginPageState extends State<LoginPage> {
     showStatus(color: Colors.green, text: response.message);
 
     if(userResponse.data.runtimeType == List<dynamic>) {
-      return Navigator.push(context,
+      return Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => AdminDashboard()));
     }else {
       pref.setString("user", response.data);
-      return Navigator.push(context,
+      return Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => UserDashboard()));
     }
 
