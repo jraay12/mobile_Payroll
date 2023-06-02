@@ -73,7 +73,10 @@ class _LoginPageState extends State<LoginPage> {
       return Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => AdminDashboard()));
     }else {
-      pref.setString("user", response.data);
+      pref.setString("user", jsonEncode(userResponse.data));
+
+      print(pref.get("user"));
+
       return Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => UserDashboard()));
     }
@@ -196,10 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: TextButton(
                            onPressed: () async {
-                            bool isLoggedIn = await login(context);
-                            if (isLoggedIn) {
-                              Navigator.pushReplacementNamed(context, 'Dashboard');
-                            }
+                            await login(context);
                           },
 
                             child: const Text(
