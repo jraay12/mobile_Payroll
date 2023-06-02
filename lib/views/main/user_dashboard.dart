@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
+import 'package:mobile_appdev_integrated/views/main/payrolls_dashboard.dart';
+import 'package:mobile_appdev_integrated/views/main/profile.dart';
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({Key? key}) : super(key: key);
@@ -83,6 +85,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
             iconColor: Colors.white,
             bubbleColor: Colors.blue,
             onPress: () {
+              Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => ProfilePage()));
               _animationController.reverse();
             }
           ),
@@ -95,7 +99,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
               iconColor: Colors.white,
               bubbleColor: Colors.blue,
               onPress: () {
-
+                Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => Payrolls()));
                 _animationController.reverse();
               }
           ),
