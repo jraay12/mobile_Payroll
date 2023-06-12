@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:mobile_appdev_integrated/models/api.dart';
 
 class ProfilePage extends StatefulWidget {
   final String userId; // New property for the user ID
@@ -36,7 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
       email = '';
       contactNumber = '';
       position = '';
-      rate = 25.0;
+      rate = 0.0;
       street = '';
       city = '';
       zipCode = '';

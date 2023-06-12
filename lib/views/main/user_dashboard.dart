@@ -108,7 +108,7 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
             : _animationController.forward(),
 
         // Floating Action button Icon color
-        // Flaoting Action button Icon
+        // Floating Action button Icon
         iconData: Icons.money,
         backGroundColor: Colors.blueGrey,
       ),
