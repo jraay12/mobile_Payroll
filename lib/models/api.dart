@@ -20,9 +20,9 @@ class Api {
       var jsonResponse = await convert.jsonDecode(response.body);
 
       ApiResponse apiResponse = ApiResponse(
-        status: jsonResponse['status'],
-        message: jsonResponse['message'],
-        data: jsonResponse['data']['token'] ?? {}
+          status: jsonResponse['status'],
+          message: jsonResponse['message'],
+          data: jsonResponse['data'] ?? {}
       );
 
       return apiResponse;
@@ -42,7 +42,7 @@ class Api {
       var url = Uri.parse("$baseURL/logout");
 
       var response = await http.post(url, body: convert.jsonEncode(data),
-        headers: {"Content-type" : "application/json"});
+          headers: {"Content-type" : "application/json"});
 
       var jsonResponse = await convert.jsonDecode(response.body);
       ApiResponse apiResponse = ApiResponse(
@@ -76,9 +76,9 @@ class Api {
       var jsonResponse = await convert.jsonDecode(response.body);
 
       ApiResponse apiResponse = ApiResponse(
-        status: jsonResponse['status'],
-        message: jsonResponse['message'],
-        data: jsonResponse['data'] ?? {}
+          status: jsonResponse['status'],
+          message: jsonResponse['message'],
+          data: jsonResponse['data'] ?? {}
       );
       return apiResponse;
     }
@@ -92,5 +92,37 @@ class Api {
     }
   }
 
+  Future getPayroll(String userId, String token) async {
+    try {
+      var url = Uri.parse("$baseURL/payroll/latest/${userId}");
+
+      var response = await http.get(url, headers: {'Authorization' : 'Bearer $token'});
+
+      if(response.statusCode != 200) {
+        throw "No existing payroll";
+      }
+      var jsonResponse = await convert.jsonDecode(response.body);
+      return jsonResponse;
+    }
+    catch (error) {
+      rethrow;
+    }
+  }
+
+  // Future getSalary(String userId, String token) async {
+  //   try {
+  //     var url = Uri.parse("$baseURL/payroll/${userId}");
+  //   }
+  //   catch(error) {
+  //     ApiResponse apiResponse = ApiResponse(
+  //         status: 'fail',
+  //         message: "Request Error: $error",
+  //         data: ""
+  //     );
+  //     throw apiResponse;
+  //   }
+  // }
 
 }
+
+
