@@ -18,10 +18,12 @@ class CustomText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    Size widgetSize = MediaQuery.of(context).size;
+
     return Container(
-      margin: EdgeInsets.all(10),
-      height: 60,
-      width: 180,
+      height: 40,
+      width: widgetSize.width,
       child: Row(
         children: [
           Text("$title : ",
