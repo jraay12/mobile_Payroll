@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
+import 'package:mobile_appdev_integrated/custom_widgets/custom_text.dart';
 import 'package:mobile_appdev_integrated/models/api.dart';
 import 'package:mobile_appdev_integrated/views/auth/login_page.dart';
 import 'package:mobile_appdev_integrated/views/main/payrolls_dashboard.dart';
@@ -15,10 +16,26 @@ class UserDashboard extends StatefulWidget {
   State<UserDashboard> createState() => _UserDashboardState();
 }
 
-class _UserDashboardState extends State<UserDashboard> with SingleTickerProviderStateMixin{
+class _UserDashboardState extends State<UserDashboard> with SingleTickerProviderStateMixin {
+
+  Map payrollData = {};
 
   Future getPayroll() async {
 
+    final pref = await SharedPreferences.getInstance();
+
+    print(pref.getString("token"));
+
+    String token = pref.getString('token')!;
+
+    String prefData = pref.getString("user")!;
+    var userData = jsonDecode(prefData);
+    String userId = userData['id'].toString();
+    var payroll = await Api.instance.getPayroll(userId, token);
+
+    print(payroll);
+
+    return payroll;
   }
 
   showStatus({required Color color, required String text}) {    // Snackbar to show message of API Response
@@ -47,17 +64,23 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
 
     final curvedAnimation = CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
     _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
-
-
     super.initState();
   }
 
-
-  Future getPayRoll() async {}
   @override
   Widget build(BuildContext context) {
+
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
+        title: const Text("Payroll",
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold
+            )
+        ),
+        centerTitle: true,
         elevation: 0,
         actions: [
           IconButton(onPressed: () async {
@@ -68,11 +91,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
 
             var userData = jsonDecode(prefData);
 
-            print(userData['email']);
-
             var response = await Api.instance.logout({'email' :userData['email']});
             if(response.status == 'success') {
-              print(response.message);
               pref.clear();
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (context) => LoginPage()));
@@ -86,29 +106,94 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        child: FutureBuilder(
-          future: getPayRoll(),
-          builder: (context, snapshot) {
-            if(snapshot.connectionState == ConnectionState.done) {
-              if(snapshot.hasError) {
-                return RefreshIndicator(
-                    onRefresh: () async {
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.all(20),
+                margin: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                height: size.height * 0.5,
+                width: size.width,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.indigo[900]
+                ),
+                child: FutureBuilder(
+                  future: getPayroll(),
+                  builder: (context, snapshot) {
+                    if(snapshot.connectionState == ConnectionState.done) {
+                      if(snapshot.hasError) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("Error Fetching Data",
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Container(
+                                    color: Colors.blue,
+                                    height: 50,
+                                    width: 120,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        payrollData = await getPayroll();
+                                        setState(() => payrollData);
+                                      },
+                                      child: const Text(
+                                        "Refresh",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),
+                                      ),
+                                    )
+                                )
+                            )
+                          ],
+                        );
+                      }
+                      if(snapshot.hasData) {
 
-                    },
-                    child: Text("USER")
-                );
-              }
-            }
-            return RefreshIndicator(
-              onRefresh: () async {
+                        payrollData.isEmpty ? payrollData = snapshot.data! : null;
 
-              },
-              child: SingleChildScrollView(
+                        Map payroll = payrollData['payroll'];
+                        Map salary = payrollData['salary'];
+                        Map deduction = payrollData['deduction'];
 
-              ),
-            );
-          },
-        ),
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Text("Payroll: ${payroll['month']}",
+                            // style: TextStyle(
+                            //   fontSize: 20,
+                            //   fontWeight: FontWeight.bold,
+                            //   color: Colors.white
+                            // )),
+                            
+                            CustomText(title: "Payroll",
+                              data: payroll['month'],
+                              color: Colors.white,
+                              weight: FontWeight.bold, size: 20,)
+                          ],
+
+                        );
+                      }
+                    }
+                    return const Center(
+                        child: CircularProgressIndicator()
+                    );
+                  },
+                ),
+              )
+            ],
+          )
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
@@ -152,8 +237,10 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
         // Floating Action button Icon color
         // Flaoting Action button Icon
         iconData: Icons.money,
-        backGroundColor: Colors.blueGrey,
+        backGroundColor: Colors.blue,
       ),
     );
   }
 }
+
+
