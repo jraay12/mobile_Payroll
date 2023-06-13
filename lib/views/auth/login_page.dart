@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
 
   @override
   _LoginPageState createState() => _LoginPageState();
-  
+
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
 
- 
+
 
   showStatus({required Color color, required String text}) {    // Snackbar to show message of API Response
 
@@ -47,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    Map credentials ={
+    Map credentials = {
       'email': emailController.text,
       'password': passwordController.text
     };
@@ -58,29 +58,16 @@ class _LoginPageState extends State<LoginPage> {
       return showStatus(color: Colors.red, text: response.message);
     }
 
+    print(response.data);
+
     final pref = await SharedPreferences.getInstance();
-    pref.setString("token", response.data!);
-
-    var userResponse = await Api.instance.getUser(response.data);
-
-    if(userResponse.status == "fail") {
-      return showStatus(color: Colors.red, text: userResponse.message);
-    }
+    pref.setString("token", response.data!['token']);
 
     showStatus(color: Colors.green, text: response.message);
-
-    if(userResponse.data.runtimeType == List<dynamic>) {
-      return Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => AdminDashboard()));
-    }else {
-      pref.setString("user", jsonEncode(userResponse.data));
-
-      print(pref.get("user"));
-
-      return Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => UserDashboard()));
-    }
-
+    pref.setString("user", jsonEncode(response.data!['user']));
+    
+    return Navigator.pushAndRemoveUntil(context,
+        MaterialPageRoute(builder: (context) => UserDashboard()), (route) => false);
 
   }
 
@@ -189,18 +176,18 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(
                           height: 20,
                         ),
-                       Container(
-                        alignment: Alignment.center,
-                        width: 260,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: Colors.blue,
+                        Container(
+                          alignment: Alignment.center,
+                          width: 260,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.blue,
                           ),
                           child: TextButton(
-                           onPressed: () async {
-                            await login(context);
-                          },
+                            onPressed: () async {
+                              await login(context);
+                            },
 
                             child: const Text(
                               'Login',
