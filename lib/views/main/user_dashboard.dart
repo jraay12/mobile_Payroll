@@ -8,6 +8,7 @@ import 'package:mobile_appdev_integrated/views/auth/login_page.dart';
 import 'package:mobile_appdev_integrated/views/main/payrolls_dashboard.dart';
 import 'package:mobile_appdev_integrated/views/main/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({Key? key}) : super(key: key);
@@ -19,22 +20,22 @@ class UserDashboard extends StatefulWidget {
 class _UserDashboardState extends State<UserDashboard> with SingleTickerProviderStateMixin {
 
   Map payrollData = {};
+  var rate = 0;
+  var userData = {};
 
   Future getPayroll() async {
 
     final pref = await SharedPreferences.getInstance();
 
-    print(pref.getString("token"));
-
     String token = pref.getString('token')!;
 
     String prefData = pref.getString("user")!;
-    var userData = jsonDecode(prefData);
+    userData = jsonDecode(prefData);
     String userId = userData['id'].toString();
+
+    rate = userData['rate'];
+
     var payroll = await Api.instance.getPayroll(userId, token);
-
-    print(payroll);
-
     return payroll;
   }
 
@@ -180,9 +181,64 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                             CustomText(title: "Payroll",
                               data: payroll['month'],
                               color: Colors.white,
-                              weight: FontWeight.bold, size: 20,)
+                              weight: FontWeight.bold, size: 20,),
+                            Divider(thickness: 2, color: Colors.white),
+                            const SizedBox(height: 20),
+                            CustomText(title: "Working Days",
+                              data: payroll['working_days'].toString(),
+                              color: Colors.white,
+                              weight: FontWeight.bold, size: 20,),
+                            CustomText(title: "Total Hours Overtime",
+                              data: payroll['total_hours_overtime'].toString(),
+                              color: Colors.white,
+                              weight: FontWeight.bold, size: 20,),
+                            CustomText(title: "Rate",
+                              data: "${rate.toString()} /hr",
+                              color: Colors.white,
+                              weight: FontWeight.bold, size: 20,),
+                            SizedBox(height: 50),
+                            CustomText(title: "Net Salary",
+                              data: (NumberFormat.currency(locale: 'en_US', symbol: '').format(salary['net_salary'])).toString(),
+                              color: Colors.white,
+                              weight: FontWeight.bold, size: 20,),
                           ],
-
+                        );
+                      }
+                      else {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("No existing data",
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Container(
+                                    color: Colors.blue,
+                                    height: 50,
+                                    width: 120,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        payrollData = await getPayroll();
+                                        setState(() => payrollData);
+                                      },
+                                      child: const Text(
+                                        "Refresh",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),
+                                      ),
+                                    )
+                                )
+                            )
+                          ],
                         );
                       }
                     }
@@ -208,7 +264,7 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
               bubbleColor: Colors.blue,
               onPress: () {
                 Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()));
+                    MaterialPageRoute(builder: (context) => ProfilePage(userData: userData)));
                 _animationController.reverse();
               }
           ),
