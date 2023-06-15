@@ -1,11 +1,21 @@
+import 'dart:convert';
+
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_appdev_integrated/custom_widgets/custom_text.dart';
+import 'package:mobile_appdev_integrated/models/api.dart';
 import 'package:mobile_appdev_integrated/views/main/payrolls_dashboard.dart';
 import 'package:mobile_appdev_integrated/views/main/user_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProfilePage extends StatefulWidget {
 
-  const ProfilePage({Key? key}) : super(key: key);
+  final userData;
+  final address;
+
+  const ProfilePage({required this.userData, required this.address, Key? key}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -15,9 +25,21 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   late Animation<double> _animation;
   late AnimationController _animationController;
+  String photoUrl = "";
+  String token = "";
+  Future getPhoto () async {
+    final pref = await SharedPreferences.getInstance();
+    token = pref.getString("token")!;
+    String prefData = pref.getString("user")!;
+    var userData = jsonDecode(prefData);
+    setState(() {
+      photoUrl = userData['photo'];
+    });
+  }
 
   @override
-  void initState(){
+  void initState() {
+    getPhoto();
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 260),
@@ -30,8 +52,103 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Text("Profile"),
+      extendBodyBehindAppBar: true,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // CircleAvatar(backgroundColor: Colors.blue, radius: 80),
+            // SizedBox(height: 20)
+            SizedBox(
+              height: size.height * 0.4,
+              width: size.width,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: size.height * 0.4,
+                    width: size.width,
+                    decoration: const BoxDecoration(
+                      gradient: RadialGradient(
+                          colors: [Colors.blueGrey, Colors.blueAccent],
+                          radius: 0.4,
+                          focal: Alignment(-0.4, -0.4),
+                          tileMode: TileMode.clamp
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    child: Container(
+                      height: size.height * 0.25,
+                      width: size.width,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.vertical(
+                              top: Radius.elliptical(size.width, 150)
+                          ),
+                          color: Colors.white
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 60),
+                        child: Column(
+                          children: [
+                            Text(widget.userData['name'],
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontFamily: "Roboto",
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.deepPurple
+                              ),),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Text(widget.userData['position'],
+                                style: TextStyle(
+                                    color: Colors.black.withOpacity(0.7),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18
+                                ),),
+                            ),
+                            Text(widget.userData['email'], style: TextStyle(
+                              fontSize: 18
+                            ),)
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 50,
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundImage: CachedNetworkImageProvider(
+                        '${dotenv.env['API_URL']}/getPhoto/$photoUrl',
+                        headers: {'Authorization': 'Bearer $token'},
+                      ),
+                      child: Icon(Icons.person, size: 80),
+                    ),
+                  ),
+                ],
+
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: Column(
+                children: [
+                  CustomText(title: "Contact No.", data: widget.userData['contact_number'], size: 18),
+                  CustomText(title: "Street", data: widget.address['street'], size: 18),
+                  CustomText(title: "City", data: widget.address['city'], size: 18),
+                  CustomText(title: "Zipcode", data: widget.address['zip_code'], size: 18),
+                  CustomText(title: "Country", data: widget.address['country'], size: 20, weight: FontWeight.bold)
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
         items: <Bubble>[
