@@ -9,12 +9,15 @@ void main() async {
 
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
-
+  final pref = await SharedPreferences.getInstance();
+  bool? loggedIn = false;
+  loggedIn = pref.getBool("loggedIn");
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(primarySwatch: Colors.lightBlue),
-    home: LoginPage(),
+    home: loggedIn == null || loggedIn == false ? LoginPage() : UserDashboard()
   ));
 }
+
 
  
