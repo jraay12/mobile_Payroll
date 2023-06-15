@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_appdev_integrated/views/main/profile.dart';
 import 'package:mobile_appdev_integrated/views/main/user_dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Payrolls extends StatefulWidget {
   const Payrolls({Key? key}) : super(key: key);
@@ -55,9 +58,16 @@ class _PayrollsState extends State<Payrolls> with SingleTickerProviderStateMixin
               icon: Icons.person,
               iconColor: Colors.white,
               bubbleColor: Colors.blue,
-              onPress: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()));
+              onPress: () async {
+
+                final pref = await SharedPreferences.getInstance();
+                String prefData = pref.getString("user")!;
+                var userData = jsonDecode(prefData);
+                var addressData = jsonDecode(pref.getString("address")!);
+                print(addressData);
+
+                await Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => ProfilePage(userData: userData, address: addressData,)));
                 _animationController.reverse();
               }
           ),
