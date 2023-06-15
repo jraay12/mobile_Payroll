@@ -29,13 +29,13 @@ class CustomText extends StatelessWidget {
           Text("$title : ",
           style: TextStyle(
             fontSize: size ?? 14,
-            fontWeight: weight ?? null,
+            fontWeight: weight,
             color: color ?? Colors.black
           ),),
           Text(data!,
             style: TextStyle(
                 fontSize: size ?? 14,
-                fontWeight: weight ?? null,
+                fontWeight: weight,
                 color: color ?? Colors.black
             ),),
         ],
