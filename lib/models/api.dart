@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:mobile_appdev_integrated/models/api_response.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Api {
 
@@ -92,12 +93,37 @@ class Api {
     }
   }
 
+  Future getPhoto(String photo) async {
+    try {
+      final pref = await SharedPreferences.getInstance();
+      String token = pref.getString('token')!;
+      var url = Uri.parse("$baseURL/getPhoto/$photo");
+      var response = await http.get(url, headers: {'Authorization' : 'Bearer $token'});
+      return response;
+    }
+    catch(error) {
+      return error;
+    }
+  }
+
+  Future getAddress(int id, String token) async {
+    try {
+      var url = Uri.parse("$baseURL/address/$id");
+      var response = await http.get(url, headers: {'Authorization' : 'Bearer $token'});
+      var jsonResponse = convert.jsonDecode(response.body);
+      return jsonResponse;
+    }
+    catch(error) {
+      return error;
+    }
+  }
+
   Future getPayroll(String userId, String token) async {
     try {
       var url = Uri.parse("$baseURL/payroll/latest/${userId}");
 
       var response = await http.get(url, headers: {'Authorization' : 'Bearer $token'});
-
+      print(response.body);
       if(response.statusCode != 200) {
         throw "No existing payroll";
       }
