@@ -5,6 +5,7 @@ import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:mobile_appdev_integrated/custom_widgets/custom_text.dart';
 import 'package:mobile_appdev_integrated/models/api.dart';
 import 'package:mobile_appdev_integrated/views/auth/login_page.dart';
+import 'package:mobile_appdev_integrated/views/main/payroll_details.dart';
 import 'package:mobile_appdev_integrated/views/main/payrolls_dashboard.dart';
 import 'package:mobile_appdev_integrated/views/main/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
   Map payrollData = {};
   var rate = 0;
   var userData = {};
+  String tokenData = "";
+  Map addressData = {};
 
   Future getPayroll() async {
 
@@ -33,9 +36,13 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
     userData = jsonDecode(prefData);
     String userId = userData['id'].toString();
 
-    rate = userData['rate'];
-
+    rate = userData['rate'] ?? 0;
+    tokenData = token;
     var payroll = await Api.instance.getPayroll(userId, token);
+    print("wtf");
+    var address = await Api.instance.getAddress(int.parse(userId), token);
+    addressData = address['address'];
+    pref.setString("address", addressData.toString());
     return payroll;
   }
 
@@ -123,6 +130,43 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                   future: getPayroll(),
                   builder: (context, snapshot) {
                     if(snapshot.connectionState == ConnectionState.done) {
+                      if(!snapshot.hasData) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("No existing data",
+                              style: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ClipRRect(
+                                borderRadius: BorderRadius.circular(40),
+                                child: Container(
+                                    color: Colors.blue,
+                                    height: 50,
+                                    width: 120,
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        payrollData = await getPayroll();
+                                        setState(() => payrollData);
+                                      },
+                                      child: const Text(
+                                        "Refresh",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white
+                                        ),
+                                      ),
+                                    )
+                                )
+                            )
+                          ],
+                        );
+                      }
                       if(snapshot.hasError) {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,21 +211,23 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                         Map payroll = payrollData['payroll'];
                         Map salary = payrollData['salary'];
                         Map deduction = payrollData['deduction'];
+                        payroll['rate'] = rate;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Text("Payroll: ${payroll['month']}",
-                            // style: TextStyle(
-                            //   fontSize: 20,
-                            //   fontWeight: FontWeight.bold,
-                            //   color: Colors.white
-                            // )),
-                            
-                            CustomText(title: "Payroll",
-                              data: payroll['month'],
-                              color: Colors.white,
-                              weight: FontWeight.bold, size: 20,),
+
+                            Row(children: [
+                              Expanded(child: CustomText(title: "Payroll",
+                                data: payroll['month'],
+                                color: Colors.white,
+                                weight: FontWeight.bold, size: 20,)),
+                              IconButton(onPressed: () async {
+                                payrollData = await getPayroll();
+                                setState(() => payrollData);
+                              }, icon: const Icon(Icons.refresh),
+                               color: Colors.white,)
+                            ]),
                             Divider(thickness: 2, color: Colors.white),
                             const SizedBox(height: 20),
                             CustomText(title: "Working Days",
@@ -201,42 +247,32 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                               data: (NumberFormat.currency(locale: 'en_US', symbol: '').format(salary['net_salary'])).toString(),
                               color: Colors.white,
                               weight: FontWeight.bold, size: 20,),
-                          ],
-                        );
-                      }
-                      else {
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text("No existing data",
-                              style: TextStyle(
-                                  fontSize: 22,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            ClipRRect(
-                                borderRadius: BorderRadius.circular(40),
-                                child: Container(
-                                    color: Colors.blue,
-                                    height: 50,
-                                    width: 120,
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: Container(
+                                    height: 40,
+                                    width: size.width * 0.5,
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        payrollData = await getPayroll();
-                                        setState(() => payrollData);
-                                      },
-                                      child: const Text(
-                                        "Refresh",
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white
-                                        ),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue[200]
                                       ),
-                                    )
-                                )
+                                      onPressed: () {
+                                        Navigator.push(context,
+                                            MaterialPageRoute(builder: (context) => PayrollDetails(payroll: payroll, salary: salary, deduction: deduction)));
+                                      },
+                                      child: Text("VIEW DETAILS",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black
+                                        ),),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             )
                           ],
                         );
@@ -262,9 +298,11 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
               icon: Icons.person,
               iconColor: Colors.white,
               bubbleColor: Colors.blue,
-              onPress: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => ProfilePage(userData: userData)));
+              onPress: () async {
+
+
+                await Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => ProfilePage(userData: userData, address: addressData)));
                 _animationController.reverse();
               }
           ),
