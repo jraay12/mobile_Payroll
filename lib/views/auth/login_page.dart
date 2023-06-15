@@ -22,9 +22,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool _isLoading = false;
-
-
+  bool disabled = true;
 
   showStatus({required Color color, required String text}) {    // Snackbar to show message of API Response
 
@@ -51,24 +49,29 @@ class _LoginPageState extends State<LoginPage> {
       'email': emailController.text,
       'password': passwordController.text
     };
+    print(credentials);
+    setState(() {
+      disabled = !disabled;
+    });
 
     var response = await Api.instance.login(credentials);
 
     if(response.status == "fail") {
+      setState(() {
+        disabled = !disabled;
+      });
       return showStatus(color: Colors.red, text: response.message);
     }
-
-    print(response.data);
 
     final pref = await SharedPreferences.getInstance();
     pref.setString("token", response.data!['token']);
 
     showStatus(color: Colors.green, text: response.message);
+    pref.setBool("loggedIn", true);
     pref.setString("user", jsonEncode(response.data!['user']));
-    
+
     return Navigator.pushAndRemoveUntil(context,
         MaterialPageRoute(builder: (context) => UserDashboard()), (route) => false);
-
   }
 
   @override
@@ -188,7 +191,6 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () async {
                               await login(context);
                             },
-
                             child: const Text(
                               'Login',
                               style: TextStyle(
@@ -211,5 +213,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+// disabled ? () async {
+// await login(context);
+// } : null,
 
 
