@@ -166,20 +166,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                 _animationController.reverse();
               }
           ),
-          Bubble(
-              title: "Payroll Logs",
-              titleStyle: TextStyle(
-                  fontSize: 12
-              ),
-              icon: Icons.paypal,
-              iconColor: Colors.white,
-              bubbleColor: Colors.blue,
-              onPress: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => Payrolls()));
-                _animationController.reverse();
-              }
-          ),
+
 
         ],
         animation: _animation,
