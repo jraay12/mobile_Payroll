@@ -39,8 +39,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
     rate = userData['rate'] ?? 0;
     tokenData = token;
     var payroll = await Api.instance.getPayroll(userId, token);
-    print("wtf");
     var address = await Api.instance.getAddress(int.parse(userId), token);
+    payroll = payroll.runtimeType == List ? null : payroll;
     addressData = address['address'];
     pref.setString("address", addressData.toString());
     return payroll;
@@ -150,7 +150,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                                     width: 120,
                                     child: ElevatedButton(
                                       onPressed: () async {
-                                        payrollData = await getPayroll();
+                                        var payroll = await getPayroll();
+                                        payroll == null ? payrollData = {} : payrollData = payroll;
                                         setState(() => payrollData);
                                       },
                                       child: const Text(
@@ -187,7 +188,8 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                                     width: 120,
                                     child: ElevatedButton(
                                       onPressed: () async {
-                                        payrollData = await getPayroll();
+                                        var payroll = await getPayroll();
+                                        payroll == null ? payrollData = {} : payrollData = payroll;
                                         setState(() => payrollData);
                                       },
                                       child: const Text(
@@ -205,7 +207,6 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                         );
                       }
                       if(snapshot.hasData) {
-
                         payrollData.isEmpty ? payrollData = snapshot.data! : null;
 
                         Map payroll = payrollData['payroll'];
@@ -306,21 +307,6 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                 _animationController.reverse();
               }
           ),
-          Bubble(
-              title: "Payroll Logs",
-              titleStyle: TextStyle(
-                  fontSize: 12
-              ),
-              icon: Icons.paypal,
-              iconColor: Colors.white,
-              bubbleColor: Colors.blue,
-              onPress: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => Payrolls()));
-                _animationController.reverse();
-              }
-          ),
-
         ],
         animation: _animation,
         iconColor: Colors.white,
