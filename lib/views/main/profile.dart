@@ -27,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
   late AnimationController _animationController;
   String photoUrl = "";
   String token = "";
+  var addressData;
   Future getPhoto () async {
     final pref = await SharedPreferences.getInstance();
     token = pref.getString("token")!;
@@ -35,6 +36,18 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
     setState(() {
       photoUrl = userData['photo'];
     });
+  }
+
+  Future getAddress() async{
+    final pref = await SharedPreferences.getInstance();
+
+    String prefData = pref.getString("user")!;
+    var userData = jsonDecode(prefData);
+    String userId = userData['id'].toString();
+
+    token = pref.getString("token")!;
+    var address = await Api.instance.getAddress(int.parse(userId), token);
+    return address;
   }
 
   @override
@@ -127,7 +140,6 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
                         '${dotenv.env['API_URL']}/getPhoto/$photoUrl',
                         headers: {'Authorization': 'Bearer $token'},
                       ),
-                      child: Icon(Icons.person, size: 80),
                     ),
                   ),
                 ],
@@ -139,10 +151,30 @@ class _ProfilePageState extends State<ProfilePage> with SingleTickerProviderStat
               child: Column(
                 children: [
                   CustomText(title: "Contact No.", data: widget.userData['contact_number'], size: 18),
-                  CustomText(title: "Street", data: widget.address['street'], size: 18),
-                  CustomText(title: "City", data: widget.address['city'], size: 18),
-                  CustomText(title: "Zipcode", data: widget.address['zip_code'], size: 18),
-                  CustomText(title: "Country", data: widget.address['country'], size: 20, weight: FontWeight.bold)
+                  FutureBuilder(
+                      future: getAddress(),
+                      builder: (context, snapshot) {
+                        if(snapshot.connectionState == ConnectionState.done) {
+                          if(!snapshot.hasData || snapshot.hasError) {
+                            return SizedBox();
+                          }
+                          if(snapshot.hasData) {
+                            addressData == null ? addressData = snapshot.data! : null;
+                            return Column(
+                              children: [
+                                CustomText(title: "Street", data: widget.address['street'], size: 18),
+                                CustomText(title: "City", data: widget.address['city'], size: 18),
+                                CustomText(title: "Zipcode", data: widget.address['zip_code'], size: 18),
+                                CustomText(title: "Country", data: widget.address['country'], size: 20, weight: FontWeight.bold)
+                              ],
+                            );
+                          }
+                        }
+                        return const Center(
+                            child: CircularProgressIndicator()
+                        );
+                      }
+            )
                 ],
               ),
             )
