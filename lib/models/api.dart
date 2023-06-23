@@ -18,6 +18,8 @@ class Api {
       var response = await http.post(url, body: convert.jsonEncode(data),
           headers: {"Content-type" : "application/json"});
 
+      print(response.body);
+
       var jsonResponse = await convert.jsonDecode(response.body);
 
       ApiResponse apiResponse = ApiResponse(

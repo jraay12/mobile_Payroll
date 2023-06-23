@@ -243,7 +243,7 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
                               data: "${rate.toString()} /hr",
                               color: Colors.white,
                               weight: FontWeight.bold, size: 20,),
-                            SizedBox(height: 50),
+                            Expanded(child: SizedBox()),
                             CustomText(title: "Net Salary",
                               data: (NumberFormat.currency(locale: 'en_US', symbol: '').format(salary['net_salary'])).toString(),
                               color: Colors.white,
