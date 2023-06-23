@@ -300,8 +300,6 @@ class _UserDashboardState extends State<UserDashboard> with SingleTickerProvider
               iconColor: Colors.white,
               bubbleColor: Colors.blue,
               onPress: () async {
-
-
                 await Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => ProfilePage(userData: userData, address: addressData)));
                 _animationController.reverse();

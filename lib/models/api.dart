@@ -125,10 +125,12 @@ class Api {
       var url = Uri.parse("$baseURL/payroll/latest/${userId}");
 
       var response = await http.get(url, headers: {'Authorization' : 'Bearer $token'});
+
       if(response.statusCode != 200) {
         throw "No existing payroll";
       }
       var jsonResponse = await convert.jsonDecode(response.body);
+      print(jsonResponse);
       return jsonResponse;
     }
     catch (error) {
